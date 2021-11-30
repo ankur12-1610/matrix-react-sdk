@@ -58,6 +58,11 @@ import UIStore from "../../../stores/UIStore";
 import QuickSettingsButton from "./QuickSettingsButton";
 import { useSettingValue } from "../../../hooks/useSettings";
 import UserMenu from "../../structures/UserMenu";
+import { isMac } from "../../../Keyboard";
+import { useDispatcher } from "../../../hooks/useDispatcher";
+import defaultDispatcher from "../../../dispatcher/dispatcher";
+import { ActionPayload } from "../../../dispatcher/payloads";
+import { Action } from "../../../dispatcher/actions";
 
 const useSpaces = (): [Room[], MetaSpace[], Room[], SpaceKey] => {
     const invites = useEventEmitterState<Room[]>(SpaceStore.instance, UPDATE_INVITED_SPACES, () => {
@@ -252,7 +257,22 @@ const InnerSpacePanel = React.memo<IInnerSpacePanelProps>(({ children, isPanelCo
     });
 
     return <div className="mx_SpaceTreeLevel">
-        <UserMenu isPanelCollapsed={isPanelCollapsed} />
+        <UserMenu isPanelCollapsed={isPanelCollapsed}>
+            <AccessibleTooltipButton
+                className={classNames("mx_SpacePanel_toggleCollapse", { expanded: !isPanelCollapsed })}
+                onClick={() => setPanelCollapsed(!isPanelCollapsed)}
+                title={isPanelCollapsed ? _t("Open sidebar") : _t("Close sidebar")}
+                tooltip={<div>
+                    <div className="mx_Tooltip_title">
+                        { isPanelCollapsed ? _t("Open sidebar") : _t("Close sidebar") }
+                    </div>
+                    <div className="mx_Tooltip_sub">
+                        { isMac ? "⌘ + ⇧ + D" : "Ctrl + Shift + D" }
+                    </div>
+                </div>}
+                forceHide={isPanelCollapsed}
+            />
+        </UserMenu>
         { metaSpacesSection }
         { invites.map(s => (
             <SpaceItem
@@ -294,6 +314,12 @@ const SpacePanel = () => {
         return () => UIStore.instance.stopTrackingElementDimensions("SpacePanel");
     }, []);
 
+    useDispatcher(defaultDispatcher, (payload: ActionPayload) => {
+        if (payload.action === Action.ToggleSpacePanel) {
+            setPanelCollapsed(!isPanelCollapsed);
+        }
+    });
+
     return (
         <DragDropContext onDragEnd={result => {
             if (!result.destination) return; // dropped outside the list
@@ -327,14 +353,7 @@ const SpacePanel = () => {
                                 </AutoHideScrollbar>
                             ) }
                         </Droppable>
-                        <AccessibleTooltipButton
-                            className={classNames("mx_SpacePanel_toggleCollapse", { expanded: !isPanelCollapsed })}
-                            onClick={() => setPanelCollapsed(!isPanelCollapsed)}
-                            title={isPanelCollapsed ? _t("Expand space panel") : _t("Collapse space panel")}
-                            forceHide={!isPanelCollapsed}
-                        >
-                            { !isPanelCollapsed ? _t("Collapse") : null }
-                        </AccessibleTooltipButton>
+
                         { metaSpacesEnabled && <QuickSettingsButton isPanelCollapsed={isPanelCollapsed} /> }
                     </ul>
                 ) }
