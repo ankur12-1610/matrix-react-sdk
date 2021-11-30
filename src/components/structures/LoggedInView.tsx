@@ -34,7 +34,7 @@ import HomePage from "./HomePage";
 import ResizeNotifier from "../../utils/ResizeNotifier";
 import PlatformPeg from "../../PlatformPeg";
 import { DefaultTagID } from "../../stores/room-list/models";
-import { hideToast as hideServerLimitToast, showToast as showServerLimitToast, } from "../../toasts/ServerLimitToast";
+import { hideToast as hideServerLimitToast, showToast as showServerLimitToast } from "../../toasts/ServerLimitToast";
 import { Action } from "../../dispatcher/actions";
 import LeftPanel from "./LeftPanel";
 import CallContainer from '../views/voip/CallContainer';
