@@ -67,6 +67,7 @@ $activeBorderColor: $primary-content;
 
         &.expanded {
             margin-left: auto;
+            margin-right: -12px; // overflow into .mx_UserMenu's margin without butchering its bottom stroke
 
             &::before {
                 transform: rotate(90deg);
