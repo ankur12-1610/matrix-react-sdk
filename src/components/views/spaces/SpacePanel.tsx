@@ -44,7 +44,6 @@ import {
     UPDATE_SELECTED_SPACE,
     UPDATE_TOP_LEVEL_SPACES,
 } from "../../../stores/spaces";
-import AutoHideScrollbar from "../../structures/AutoHideScrollbar";
 import { RovingTabIndexProvider } from "../../../accessibility/RovingTabIndex";
 import { RoomNotificationStateStore } from "../../../stores/notifications/RoomNotificationStateStore";
 import SpaceContextMenu from "../context_menus/SpaceContextMenu";
@@ -58,6 +57,7 @@ import UIStore from "../../../stores/UIStore";
 import QuickSettingsButton from "./QuickSettingsButton";
 import { useSettingValue } from "../../../hooks/useSettings";
 import UserMenu from "../../structures/UserMenu";
+import IndicatorScrollbar from "../../structures/IndicatorScrollbar";
 import { isMac } from "../../../Keyboard";
 import { useDispatcher } from "../../../hooks/useDispatcher";
 import defaultDispatcher from "../../../dispatcher/dispatcher";
@@ -257,22 +257,6 @@ const InnerSpacePanel = React.memo<IInnerSpacePanelProps>(({ children, isPanelCo
     });
 
     return <div className="mx_SpaceTreeLevel">
-        <UserMenu isPanelCollapsed={isPanelCollapsed}>
-            <AccessibleTooltipButton
-                className={classNames("mx_SpacePanel_toggleCollapse", { expanded: !isPanelCollapsed })}
-                onClick={() => setPanelCollapsed(!isPanelCollapsed)}
-                title={isPanelCollapsed ? _t("Open sidebar") : _t("Close sidebar")}
-                tooltip={<div>
-                    <div className="mx_Tooltip_title">
-                        { isPanelCollapsed ? _t("Open sidebar") : _t("Close sidebar") }
-                    </div>
-                    <div className="mx_Tooltip_sub">
-                        { isMac ? "⌘ + ⇧ + D" : "Ctrl + Shift + D" }
-                    </div>
-                </div>}
-                forceHide={isPanelCollapsed}
-            />
-        </UserMenu>
         { metaSpacesSection }
         { invites.map(s => (
             <SpaceItem
@@ -334,9 +318,25 @@ const SpacePanel = () => {
                         aria-label={_t("Spaces")}
                         ref={ref}
                     >
+                        <UserMenu isPanelCollapsed={isPanelCollapsed}>
+                            <AccessibleTooltipButton
+                                className={classNames("mx_SpacePanel_toggleCollapse", { expanded: !isPanelCollapsed })}
+                                onClick={() => setPanelCollapsed(!isPanelCollapsed)}
+                                title={isPanelCollapsed ? _t("Open sidebar") : _t("Close sidebar")}
+                                tooltip={<div>
+                                    <div className="mx_Tooltip_title">
+                                        { isPanelCollapsed ? _t("Open sidebar") : _t("Close sidebar") }
+                                    </div>
+                                    <div className="mx_Tooltip_sub">
+                                        { isMac ? "⌘ + ⇧ + D" : "Ctrl + Shift + D" }
+                                    </div>
+                                </div>}
+                                forceHide={isPanelCollapsed}
+                            />
+                        </UserMenu>
                         <Droppable droppableId="top-level-spaces">
                             { (provided, snapshot) => (
-                                <AutoHideScrollbar
+                                <IndicatorScrollbar
                                     {...provided.droppableProps}
                                     wrappedRef={provided.innerRef}
                                     className="mx_SpacePanel_spaceTreeWrapper"
@@ -350,7 +350,7 @@ const SpacePanel = () => {
                                     >
                                         { provided.placeholder }
                                     </InnerSpacePanel>
-                                </AutoHideScrollbar>
+                                </IndicatorScrollbar>
                             ) }
                         </Droppable>
 
