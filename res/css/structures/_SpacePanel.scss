@@ -71,6 +71,8 @@ $activeBorderColor: $primary-content;
         }
 
         &.expanded {
+            width: 32px;
+
             &::before {
                 transform: rotate(90deg);
             }
