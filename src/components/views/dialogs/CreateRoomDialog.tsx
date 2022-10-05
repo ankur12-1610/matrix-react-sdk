@@ -20,6 +20,7 @@ import { Room } from "matrix-js-sdk/src/models/room";
 import { RoomType } from "matrix-js-sdk/src/@types/event";
 import { JoinRule, Preset, Visibility } from "matrix-js-sdk/src/@types/partials";
 
+import SettingsStore from '../../../settings/SettingsStore';
 import SdkConfig from '../../../SdkConfig';
 import withValidation, { IFieldState } from '../elements/Validation';
 import { _t } from '../../../languageHandler';
@@ -59,6 +60,7 @@ interface IState {
 
 export default class CreateRoomDialog extends React.Component<IProps, IState> {
     private readonly supportsRestricted: boolean;
+    private readonly knockingEnabled: boolean;
     private nameField = createRef<Field>();
     private aliasField = createRef<RoomAliasField>();
 
@@ -66,12 +68,15 @@ export default class CreateRoomDialog extends React.Component<IProps, IState> {
         super(props);
 
         this.supportsRestricted = !!this.props.parentSpace;
+        this.knockingEnabled = SettingsStore.getValue("feature_knocking");
 
         let joinRule = JoinRule.Invite;
         if (this.props.defaultPublic) {
             joinRule = JoinRule.Public;
         } else if (this.supportsRestricted) {
             joinRule = JoinRule.Restricted;
+        } else if (this.knockingEnabled) {
+            joinRule = JoinRule.Knock;
         }
 
         this.state = {

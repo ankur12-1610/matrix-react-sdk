@@ -49,11 +49,13 @@ enum MessageCase {
     Rejecting = "Rejecting",
     Kicked = "Kicked",
     Banned = "Banned",
+    Accepted = "Accepted",
     OtherThreePIDError = "OtherThreePIDError",
     InvitedEmailNotFoundInAccount = "InvitedEmailNotFoundInAccount",
     InvitedEmailNoIdentityServer = "InvitedEmailNoIdentityServer",
     InvitedEmailMismatch = "InvitedEmailMismatch",
     Invite = "Invite",
+    Knock = "Knock",
     ViewingRoom = "ViewingRoom",
     RoomNotFound = "RoomNotFound",
     OtherError = "OtherError",
@@ -63,7 +65,7 @@ interface IProps {
     // if inviterName is specified, the preview bar will shown an invite to the room.
     // You should also specify onRejectClick if specifying inviterName
     inviterName?: string;
-
+    knockerName?: string;
     // If invited by 3rd party invite, the email address the invite was sent to
     invitedEmail?: string;
 
@@ -184,6 +186,10 @@ export default class RoomPreviewBar extends React.Component<IProps, IState> {
             return MessageCase.Loading;
         }
 
+        if (this.props.knockerName) {
+            return MessageCase.Knock;
+        }
+
         if (this.props.inviterName) {
             if (this.props.invitedEmail) {
                 if (this.state.threePidFetchError) {
@@ -246,6 +252,20 @@ export default class RoomPreviewBar extends React.Component<IProps, IState> {
         }
         const inviterUserId = inviteEvent.events.member.getSender();
         return room.currentState.getMember(inviterUserId);
+    }
+
+    private getKnockMember(): RoomMember {
+        const { room } = this.props;
+        if (!room) {
+            return;
+        }
+        const myUserId = MatrixClientPeg.get().getUserId();
+        const knockEvent = room.currentState.getMember(myUserId);
+        if (!knockEvent) {
+            return;
+        }
+        const knockerUserId = knockEvent.events.member.getSender();
+        return room.currentState.getMember(knockerUserId);
     }
 
     private isDMInvite(): boolean {
@@ -411,6 +431,14 @@ export default class RoomPreviewBar extends React.Component<IProps, IState> {
                         primaryActionLabel = _t("Try to join anyway");
                         primaryActionHandler = this.props.onJoinClick;
                         break;
+                    case "knock":
+                        subTitle = [
+                            _t("You can only join it with a working knock."),
+                            errCodeMessage,
+                        ];
+                        primaryActionLabel = _t("Try to join anyway");
+                        primaryActionHandler = this.props.onJoinClick;
+                        break;
                     case "public":
                         subTitle = _t("You can still join here.");
                         primaryActionLabel = _t("Join the discussion");
@@ -545,6 +573,11 @@ export default class RoomPreviewBar extends React.Component<IProps, IState> {
                         </AccessibleButton>,
                     );
                 }
+                break;
+            }
+            case MessageCase.Knock: {
+                primaryActionLabel = _t("Join the discussion");
+                primaryActionHandler = this.props.onJoinClick;
                 break;
             }
             case MessageCase.ViewingRoom: {

@@ -486,7 +486,6 @@ export class RoomViewStore extends EventEmitter {
             return inviteEvent && inviteEvent.getSender();
         }
     }
-
     public showJoinRoomError(err: MatrixError, roomId: string): void {
         let description: ReactNode = err.message ? err.message : JSON.stringify(err);
         logger.log("Failed to join room:", description);
